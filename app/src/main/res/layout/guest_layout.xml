@@ -1,41 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    android:padding="15dp"
     >
-
-
-    <EditText
-        android:id="@+id/etGuestF"
-        android:layout_width="match_parent"
-        android:textSize="30sp"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:hint="email">
+        android:layout_width="match_parent">
 
-    </EditText>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etNickname"
+            android:hint="@string/nickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
 
-    <EditText
-        android:id="@+id/etGuestL"
-        android:layout_width="match_parent"
-        android:textSize="30sp"
-        android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:hint="password"
-        android:password="true"
-        >
+    </com.google.android.material.textfield.TextInputLayout>
 
-
-    </EditText>
 
     <Button
-        android:id="@+id/btnGuest"
+        android:id="@+id/btnGuestLogin"
         android:layout_width="match_parent"
         android:textSize="30sp"
         android:gravity="center"
-        android:background="#c1112e"
+
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
-        android:text="login as guest" />
+        android:text="LOGIN AS GUEST" />
 </LinearLayout>

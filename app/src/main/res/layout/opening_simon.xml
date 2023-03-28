@@ -7,14 +7,18 @@
     android:paddingLeft="16dp"
     android:paddingBottom="16dp"
     android:paddingRight="16dp"
-    android:paddingTop="16dp">
+    android:paddingTop="16dp"
+    android:background="@drawable/gradient_list"
+    android:id ="@+id/openingLayout">
 
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="SIMON"
+        android:textColor="@color/black"
         android:textSize="60dp"
+
         ></TextView>
 <LinearLayout
     android:layout_width="match_parent"
@@ -26,9 +30,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text = "PLAY"
+        
         android:id="@+id/btnPlay"
         android:layout_gravity="center"
-        android:textSize="45dp"
+        android:textSize="39dp"
         ></Button>
     <Button
         android:layout_width="wrap_content"
@@ -38,6 +43,8 @@
         android:id="@+id/btnScoreboard"
         android:textSize="39dp"
         ></Button>
+
+
 
 
     </LinearLayout>

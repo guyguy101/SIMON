@@ -9,29 +9,34 @@
     android:paddingBottom="16dp"
     android:paddingRight="16dp"
     android:paddingTop="16dp"
-    tools:context=".MainActivity">
-
+    android:gravity="center"
+    tools:context=".MainActivity"
+    android:background="@drawable/gradient_list"
+    android:id ="@+id/mainLayout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WELCOME TO SIMON!"
+        android:textSize="35dp"
+        android:textColor="@color/black"
+        ></TextView>
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="70dp"
         android:text="Login"></Button>
 
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="70dp"
         android:text="Register"></Button>
     <Button
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="70dp"
         android:text="Guest Login"
         android:id="@+id/btnGuest"></Button>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-         />
+
 
 </LinearLayout>

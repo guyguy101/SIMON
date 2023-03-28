@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">FIREBASE</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="firstName">First Name</string>
+    <string name="lastName">Last Name</string>
+    <string name="nickname">Nickname</string>
 </resources>
