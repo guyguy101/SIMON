@@ -2,6 +2,10 @@ package com.example.firebase;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 @IgnoreExtraProperties
@@ -11,18 +15,26 @@ public class User extends Guest{
 
         private String uid;//user uid
         private String email;
-        //nickname
+
         private Integer maxScore;
+        private final Date dateJoined;
+        private Date lastDatePlayed;
 
 
         //region Constructors
         public User() {
             // Default constructor required for calls to DataSnapshot.getValue(Post.class)
+            dateJoined = new Date();
         }
 
         public User(String email,String name,String uid)
         {
             super(name);
+
+
+
+            this.dateJoined = new Date();
+            this.lastDatePlayed = new Date();
             this.uid = uid;
             this.email = email;
             this.maxScore = 0;
@@ -45,6 +57,10 @@ public class User extends Guest{
          public Integer getMaxScore(){
             return this.maxScore;
          }
+
+         public Date getDateJoined() { return this.dateJoined; }
+
+         public Date getLastDatePlayed() { return this.lastDatePlayed; }
   //endregion
         //region Setters
 

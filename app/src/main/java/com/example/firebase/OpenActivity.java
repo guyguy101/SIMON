@@ -59,6 +59,11 @@ Intent intent;
             startActivity(intent);
             finish();
         }
+        if(view == btnScoreboard){
+            intent= new Intent(this,ScoreboardActivity.class);
+            startActivity(intent);
+            finish();
+        }
 
     }
 
@@ -110,6 +115,11 @@ Intent intent;
             case R.id.logoutItem:
                 logout();
                 return true;
+            case R.id.aboutProgramItem:
+                intent = new Intent(this,AboutActivity.class);
+                startActivity(intent);
+                finish();
+
 
             default:
                 return super.onOptionsItemSelected(item);

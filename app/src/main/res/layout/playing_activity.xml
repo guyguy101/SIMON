@@ -53,6 +53,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:scaleType="fitXY"
+            android:background="@null"
             android:src="@drawable/red_button"/>
 
 
@@ -61,6 +63,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:scaleType="fitXY"
+            android:background="@null"
+
             android:src="@drawable/blue_button"/>
 
     </LinearLayout>
@@ -76,6 +81,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:scaleType="fitXY"
+            android:background="@null"
             android:src="@drawable/green_button"/>
 
         <ImageButton
@@ -83,6 +90,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:scaleType="fitXY"
+            android:background="@null"
             android:src="@drawable/yellow_button"/>
 
     </LinearLayout>

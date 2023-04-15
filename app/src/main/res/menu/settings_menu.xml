@@ -6,7 +6,7 @@
 
  <item
 
-     android:id="@+id/item2"
+     android:id="@+id/aboutProgramItem"
      android:title="About The Programmer"
      android:icon="@drawable/ic_bluetooth_icon"
 

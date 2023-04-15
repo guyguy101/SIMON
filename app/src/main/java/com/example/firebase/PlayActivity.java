@@ -6,8 +6,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Path;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,164 +38,156 @@ import java.util.Random;
 
 public class PlayActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private ImageButton btnRed, btnBlue, btnGreen, btnYellow;
-    private ImageButton[] buttons;
-    private Button btnStart , btnGameOverExit;
-    private ArrayList<Integer> sequence;
-    private int sequenceIndex;
-    private Random random;
-    private Handler handler;
-    int score =0;
-    EditText etScore ,etFinalScore;
-    private static final int DELAY_MILLIS = 1000;
-    private Dialog d;
-    private Intent intent;
-    FirebaseUser firebaseUser;
-    FirebaseAuth firebaseAuth;
-
+    protected ImageButton[] buttons;
+    protected Button btnStart, btnGameOverExit;
+    protected ArrayList<Integer> sequence = new ArrayList<>();
+    protected int sequenceIndex;
+    protected int score = 0;
+    protected EditText etScore, etFinalScore;
+    protected int DELAY_MILLIS ;
+    protected Dialog gameOverDialog;
+    protected Intent intent;
+    protected FirebaseUser firebaseUser;
+    protected FirebaseAuth firebaseAuth;
+    protected Handler handler = new Handler();
+    protected Random random = new Random();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.playing_activity);
-
-        btnRed = findViewById(R.id.btnRed);
-        btnBlue = findViewById(R.id.btnBlue);
-        btnGreen = findViewById(R.id.btnGreen);
-        btnYellow = findViewById(R.id.btnYellow);
-        buttons = new ImageButton[]{btnRed, btnBlue, btnGreen, btnYellow};
-        btnStart = findViewById(R.id.btnStart);
+        firebaseAuth = FirebaseAuth.getInstance();
+        DELAY_MILLIS = 1000;
+        firebaseUser= firebaseAuth.getCurrentUser();
+        buttons = new ImageButton[]{
+                findViewById(R.id.btnRed),
+                findViewById(R.id.btnBlue),
+                findViewById(R.id.btnGreen),
+                findViewById(R.id.btnYellow)
+        };
 
         etScore = findViewById(R.id.etScore);
+        btnStart = findViewById(R.id.btnStart);
+        btnStart.setOnClickListener(this);
 
-
-        btnStart.setOnClickListener(( this));
         for (ImageButton button : buttons) {
-            button.setOnClickListener(( this));
+            button.setOnClickListener(this);
         }
-
-        sequence = new ArrayList<>();
-        random = new Random();
-        handler = new Handler();
     }
-
 
     @Override
     public void onClick(View view) {
-
-        if(view.getId() == R.id.btnGameOverExit)
-        {
-            intent= new Intent(this,OpenActivity.class);
+        if (view.getId() == R.id.btnGameOverExit) {
+            gameOverDialog.dismiss();
+            intent = new Intent(this, OpenActivity.class);
             startActivity(intent);
-        }
-        else if (view.getId() == R.id.btnStart) {
+            finish();
+
+        } else if (view.getId() == R.id.btnStart) {
             startGame();
         } else {
             handleButtonClick((ImageButton) view);
             glowButton((ImageButton) view);
             handler.postDelayed(() -> unglowButton((ImageButton) view), DELAY_MILLIS);
         }
-
     }
-    //region Game Logic
-    private void startGame() {
+
+    protected void startGame() {
         sequence.clear();
         addToSequence();
-
         playSequence();
     }
 
-    private void addToSequence() {
+    protected void addToSequence() {
         sequence.add(random.nextInt(buttons.length));
         sequenceIndex = 0;
-
-
     }
 
-    private void playSequence() {
+    protected void playSequence() {
         for (int i = 0; i < sequence.size(); i++) {
             int buttonIndex = sequence.get(i);
             ImageButton button = buttons[buttonIndex];
             handler.postDelayed(() -> {
                 glowButton(button);
-                handler.postDelayed(() -> unglowButton(button), DELAY_MILLIS);
-            }, i * DELAY_MILLIS);
+                handler.postDelayed(() -> unglowButton(button), DELAY_MILLIS / 2);
+            }, i*DELAY_MILLIS);
         }
     }
 
+     protected void handleButtonClick(ImageButton button) {
+        if (sequence.size() > 0 && button.getId() == buttons[sequence.get(sequenceIndex)].getId()) {
+            sequenceIndex++;
+            if (sequenceIndex >= sequence.size()) {
+                addToSequence();
+                playSequence();
+                score++;
+                etScore.setText(String.valueOf(score));
+            }
 
+        } else {
+            if (firebaseUser != null) {
+                updateUserScore();
+            }
+            createGameOverDialog();
+        }
+    }
 
     private void glowButton(ImageButton button) {
         button.setAlpha(0.5f);
     }
 
     private void unglowButton(ImageButton button) {
-        button.setAlpha(1.0f);
+        if (sequence.contains(sequence.indexOf(button))) {
+            button.setAlpha(0.5f);
+        } else {
+            button.setAlpha(1.0f);
+        }
     }
 
-    private void handleButtonClick(ImageButton button) {
-        if (sequence.size() >0 &&button.getId() == buttons[sequence.get(sequenceIndex)].getId()) {
-            sequenceIndex++;
-            if (sequenceIndex >= sequence.size()) {
-                addToSequence();
-                playSequence();
-                score++;
-                etScore.setText(Integer.toString(score));
-
-
-
-            }
-
-
-        }
-
-        else {
-            if(firebaseUser != null)
-                updateUserScore();
-
-            createGameOverDialog();
-        }
-
-
-    }
-    private void updateUserScore(){
-
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    protected void updateUserScore() {
+        String userId = firebaseAuth.getCurrentUser().getUid();
         DatabaseReference maxScoreRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("maxScore");
 
         maxScoreRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get the maxScore value as an integer
                 int maxScore = dataSnapshot.getValue(Integer.class);
-
-                if(maxScore < score)
+                if (maxScore < score) {
                     maxScore = score;
+
+                    UserDatabase dbHelper = new UserDatabase(PlayActivity.this);
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    ContentValues values = new ContentValues();
+                    values.put(UserDatabase.COLUMN_MAX_SCORE, maxScore);
+                    String whereClause = UserDatabase.COLUMN_ID + "=?";
+                    String[] whereArgs = {userId};
+                    db.update(UserDatabase.TABLE_NAME, values, whereClause, whereArgs);
+                    db.close();
+                }
                 maxScoreRef.setValue(maxScore);
-                etScore.setText(Integer.toString(score));
+                etScore.setText(String.valueOf(score));
                 score = 0;
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Handle errors
                 Log.e(TAG, "Error reading max score from database: " + databaseError.getMessage());
             }
         });
-
-
     }
-    private void createGameOverDialog(){
-        d= new Dialog(this);
-        d.setContentView(R.layout.gameover_layout);
-        d.setTitle("Game Over");
-        d.setCancelable(true);
-        etFinalScore = d.findViewById(R.id.etFinalScore);
+    protected void createGameOverDialog(){
+
+        gameOverDialog = new Dialog(this);
+        gameOverDialog.setContentView(R.layout.gameover_layout);
+        gameOverDialog.setTitle("Game Over");
+        gameOverDialog.setCancelable(false);
+        etFinalScore = gameOverDialog.findViewById(R.id.etFinalScore);
         etFinalScore.setText(Integer.toString(score));
-        btnGameOverExit = d.findViewById(R.id.btnGameOverExit); // use d.findViewById instead of findViewById
+        btnGameOverExit = gameOverDialog.findViewById(R.id.btnGameOverExit); // use d.findViewById instead of findViewById
         btnGameOverExit.setOnClickListener(this::onClick);
 
-        d.show();
+        gameOverDialog.show();
+
     }
 //endregion
     //region Menu

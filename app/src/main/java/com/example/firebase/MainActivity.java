@@ -3,16 +3,25 @@ package com.example.firebase;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Path;
 import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +39,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.zip.Inflater;
 
 
@@ -60,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         LinearLayout linearLayout = findViewById(R.id.mainLayout);
 
         AnimationDrawable animationDrawable = (AnimationDrawable) linearLayout.getBackground();
@@ -79,9 +95,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnMainRegister.setOnClickListener(this);
         progressDialog = new ProgressDialog(this);
 
+        scheduleBroadcast();
 
-
-
+        UserDatabase dbHelper = new UserDatabase(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(UserDatabase.COLUMN_EMAIL, "");
+        values.put(UserDatabase.COLUMN_NICKNAME, "");
+        values.put(UserDatabase.COLUMN_MAX_SCORE, 0);
+        values.put(UserDatabase.COLUMN_DATE_JOINED, "");
+        values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, "");
+        long newRowId = db.insert(UserDatabase.TABLE_NAME, null, values);
+        db.close();
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser= firebaseAuth.getCurrentUser();
@@ -100,6 +125,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void scheduleBroadcast() {
+        Intent intent = new Intent(this, TimeReceiver.class);
+        intent.putExtra("requestCode", 123);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        long delayMillis = 15 * 1000; // 15 seconds
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delayMillis, pendingIntent);
+    }
 
     //region onClick
     @Override
@@ -131,24 +165,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String nickName = String.valueOf(etNickname.getText());
             String pass = String.valueOf(etPass.getText());
             String email = String.valueOf(etEmail.getText());
-            if(TextUtils.isEmpty(email) || TextUtils.isEmpty(pass) || TextUtils.isEmpty(nickName)){
-                Toast.makeText(MainActivity.this, "One of the fields are missing", Toast.LENGTH_LONG).show();
+            if(TextUtils.isEmpty(email)  ){
+                Toast.makeText(MainActivity.this, "Email field is missing!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(TextUtils.isEmpty(pass) ){
+                Toast.makeText(MainActivity.this, "Password field is missing!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(!emailValidator(etEmail)){
+                Toast.makeText(MainActivity.this, "Email isnt valid", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(!passwordValidator(etPass)){
+                Toast.makeText(MainActivity.this, "Password Should be at least 6 characters long!", Toast.LENGTH_LONG).show();
                 return;
             }
             register();
-            getOpenActivity();
+
+
 
         }
         else if(v==btnLogin)
         {
             String pass = String.valueOf(etPass.getText());
             String email = String.valueOf(etEmail.getText());
-            if(TextUtils.isEmpty(email) || TextUtils.isEmpty(pass) ){
-                Toast.makeText(MainActivity.this, "One of the fields are missing", Toast.LENGTH_LONG).show();
+            if(TextUtils.isEmpty(email)  ){
+                Toast.makeText(MainActivity.this, "Email field is missing!", Toast.LENGTH_LONG).show();
                 return;
             }
+            if(TextUtils.isEmpty(pass) ){
+                Toast.makeText(MainActivity.this, "Password field is missing!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(!emailValidator(etEmail)){
+                Toast.makeText(MainActivity.this, "Email is not valid!", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+
             login();
-            getOpenActivity();
+
 
 
 
@@ -177,6 +234,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
     //endregion
+    //region UTILS
+    public boolean emailValidator(EditText etMail) {
+
+        String emailToText = etMail.getText().toString();
+
+        if (!emailToText.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(emailToText).matches()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public boolean passwordValidator(EditText etPassword) {
+        String passwordToText = etPassword.getText().toString();
+        if (passwordToText.length() >= 6) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     @Override
     public void onStart(){
@@ -192,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
         finish();
     }
+    //endregion
     //region closingApp
     @Override
     public void onBackPressed() {
@@ -263,36 +340,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String uid = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
                     User user = new User(etEmail.getText().toString(),etNickname.getText().toString(),uid);
 
+
+
                     FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()){
+                                UserDatabase dbHelper = new UserDatabase(MainActivity.this);
+                                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                                ContentValues values = new ContentValues();
+                                values.put(UserDatabase.COLUMN_ID, user.getUid());
+                                values.put(UserDatabase.COLUMN_EMAIL, user.getEmail());
+                                values.put(UserDatabase.COLUMN_NICKNAME, user.getNickname());
+                                values.put(UserDatabase.COLUMN_MAX_SCORE, user.getMaxScore());
+                                values.put(UserDatabase.COLUMN_DATE_JOINED, new SimpleDateFormat("dd/MM/yyyy").format(user.getDateJoined()));
+                                values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, new SimpleDateFormat("dd/MM/yyyy").format(user.getLastDatePlayed()));
+                                long newRowId = db.insert(UserDatabase.TABLE_NAME, null, values);
+                                db.close();
                                 Toast.makeText(MainActivity.this, "Registered", Toast.LENGTH_SHORT).show();
 
                             }
                         }
+
                     });
-
-
                     btnMainLogin.setText("Logout");
-
-
-
                 } else {
                     Toast.makeText(MainActivity.this, "Registration Error", Toast.LENGTH_LONG).show();
-
                 }
-
-                d.dismiss();
                 progressDialog.dismiss();
-
-
+                d.dismiss();
+                getOpenActivity();
             }
         });
 
     }
-
-
 
     public void createLoginDialog()
     {
@@ -304,13 +385,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etPass=(EditText)d.findViewById(R.id.etPassword);
         etNickname = d.findViewById(R.id.etNickname);
         btnLogin=(Button)d.findViewById(R.id.btnLogin);
-
-
         btnLogin.setOnClickListener(this);
-
         d.show();
-
-
     }
 
     public  void login()
@@ -340,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                         d.dismiss();
                         progressDialog.dismiss();
+                        getOpenActivity();
 
                     }
                 });
