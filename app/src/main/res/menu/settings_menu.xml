@@ -13,7 +13,7 @@
      />
 
  <item
-     android:id="@+id/item3"
+     android:id="@+id/aboutAppItem"
      android:title="About The App"
      android:icon="@drawable/ic_icon"/>
 

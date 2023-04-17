@@ -9,8 +9,11 @@ import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Path;
+import android.media.MediaPlayer;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.autofill.FillEventHistory;
@@ -38,42 +41,53 @@ import java.util.Random;
 
 public class PlayActivity extends AppCompatActivity implements View.OnClickListener {
 
-    protected ImageButton[] buttons;
+    protected ImageButton[] buttons = new ImageButton[4];
     protected Button btnStart, btnGameOverExit;
-    protected ArrayList<Integer> sequence = new ArrayList<>();
-    protected int sequenceIndex;
-    protected int score = 0;
     protected EditText etScore, etFinalScore;
-    protected int DELAY_MILLIS ;
     protected Dialog gameOverDialog;
     protected Intent intent;
     protected FirebaseUser firebaseUser;
     protected FirebaseAuth firebaseAuth;
     protected Handler handler = new Handler();
     protected Random random = new Random();
+    EasySimonGame game;
 
+    protected WifiReceiver wifiReceiver = new WifiReceiver();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.playing_activity);
+
+
+
         firebaseAuth = FirebaseAuth.getInstance();
-        DELAY_MILLIS = 1000;
+        
         firebaseUser= firebaseAuth.getCurrentUser();
-        buttons = new ImageButton[]{
-                findViewById(R.id.btnRed),
-                findViewById(R.id.btnBlue),
-                findViewById(R.id.btnGreen),
-                findViewById(R.id.btnYellow)
-        };
+        buttons[0] =findViewById(R.id.btnRed);
+        buttons[1] =findViewById(R.id.btnBlue);
+        buttons[2] =findViewById(R.id.btnGreen);
+        buttons[3] =findViewById(R.id.btnYellow);
+        buttons[0].setOnClickListener(this);
+        buttons[1].setOnClickListener(this);
+        buttons[2].setOnClickListener(this);
+        buttons[3].setOnClickListener(this);
+        game = new EasySimonGame(buttons);
+        SetGameMode();
 
         etScore = findViewById(R.id.etScore);
         btnStart = findViewById(R.id.btnStart);
         btnStart.setOnClickListener(this);
 
-        for (ImageButton button : buttons) {
-            button.setOnClickListener(this);
-        }
+
     }
+
+    public EasySimonGame SetGameMode(){
+        if(OpenActivity.GAME_MODE_CODE == 1)
+            return game = new HardSimonGame(buttons);
+        return game;
+    }
+
+
 
     @Override
     public void onClick(View view) {
@@ -85,43 +99,99 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         } else if (view.getId() == R.id.btnStart) {
             startGame();
-        } else {
+        } else if(view.getId() == R.id.btnRed){
+
             handleButtonClick((ImageButton) view);
             glowButton((ImageButton) view);
-            handler.postDelayed(() -> unglowButton((ImageButton) view), DELAY_MILLIS);
+            handler.postDelayed(() -> unglowButton((ImageButton) view), game.DELAY_MILLIS);
+        }
+        else if(view.getId() == R.id.btnGreen){
+
+            handleButtonClick((ImageButton) view);
+            glowButton((ImageButton) view);
+            handler.postDelayed(() -> unglowButton((ImageButton) view), game.DELAY_MILLIS);
+        }
+        else if(view.getId() == R.id.btnYellow){
+
+            handleButtonClick((ImageButton) view);
+            glowButton((ImageButton) view);
+            handler.postDelayed(() -> unglowButton((ImageButton) view), game.DELAY_MILLIS);
+        }
+        else if(view.getId() == R.id.btnBlue){
+
+            handleButtonClick((ImageButton) view);
+            glowButton((ImageButton) view);
+            handler.postDelayed(() -> unglowButton((ImageButton) view), game.DELAY_MILLIS);
         }
     }
 
+    //region BroadcastReceiver
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(wifiReceiver);
+    }
+    //endregion
+
     protected void startGame() {
-        sequence.clear();
+        game.setSequence(new ArrayList<Integer>());
         addToSequence();
         playSequence();
     }
 
     protected void addToSequence() {
-        sequence.add(random.nextInt(buttons.length));
-        sequenceIndex = 0;
+        if(OpenActivity.GAME_MODE_CODE == 1){
+            game.addToSequence(random.nextInt(buttons.length));
+        }
+        else{
+            if(game.getSequence().size() < 4)
+                game.addToSequence(random.nextInt(buttons.length));
+            else if(game.getSequence().size() == 4){
+                ArrayList<Integer> updatedSequence = new ArrayList<>();
+                updatedSequence = game.getSequence();
+                updatedSequence.set(3,random.nextInt(buttons.length));
+                game.setSequence(updatedSequence);
+            }
+        }
+        game.setSequenceIndex(0);
     }
 
     protected void playSequence() {
-        for (int i = 0; i < sequence.size(); i++) {
-            int buttonIndex = sequence.get(i);
+        for (int i = 0; i < game.sequence.size(); i++) {
+            int buttonIndex = game.getSequence().get(i);
+
             ImageButton button = buttons[buttonIndex];
+
             handler.postDelayed(() -> {
                 glowButton(button);
-                handler.postDelayed(() -> unglowButton(button), DELAY_MILLIS / 2);
-            }, i*DELAY_MILLIS);
+                handler.postDelayed(() -> unglowButton(button), game.DELAY_MILLIS / 2);
+            }, i*game.DELAY_MILLIS);
         }
     }
 
      protected void handleButtonClick(ImageButton button) {
-        if (sequence.size() > 0 && button.getId() == buttons[sequence.get(sequenceIndex)].getId()) {
-            sequenceIndex++;
-            if (sequenceIndex >= sequence.size()) {
+        if (game.getSequence().size() > 0 && button.getId() == buttons[game.getSequence().get(game.getSequenceIndex())].getId()) {
+            game.setSequenceIndex(++game.sequenceIndex);
+            if (game.getSequenceIndex() >= game.getSequence().size()) {
                 addToSequence();
                 playSequence();
-                score++;
-                etScore.setText(String.valueOf(score));
+                if(OpenActivity.GAME_MODE_CODE == 1){
+                    int updatedScore = game.getScore() + 1 + ((HardSimonGame) game).getScoreMultiplier();
+                    game.setScore(updatedScore);
+                    etScore.setText(String.valueOf(game.getScore()));
+                }
+                else{
+                    int updatedScore = game.getScore() +1;
+                    game.setScore(updatedScore);
+                    etScore.setText(String.valueOf(game.getScore()));
+                }
+
             }
 
         } else {
@@ -132,12 +202,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void glowButton(ImageButton button) {
+    protected void glowButton(ImageButton button) {
         button.setAlpha(0.5f);
     }
 
-    private void unglowButton(ImageButton button) {
-        if (sequence.contains(sequence.indexOf(button))) {
+    protected void unglowButton(ImageButton button) {
+        if (game.sequence.contains(game.getSequence().indexOf(button))) {
             button.setAlpha(0.5f);
         } else {
             button.setAlpha(1.0f);
@@ -152,8 +222,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int maxScore = dataSnapshot.getValue(Integer.class);
-                if (maxScore < score) {
-                    maxScore = score;
+                if (maxScore < game.getScore()) {
+                    maxScore = game.getScore();
 
                     UserDatabase dbHelper = new UserDatabase(PlayActivity.this);
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -165,8 +235,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                     db.close();
                 }
                 maxScoreRef.setValue(maxScore);
-                etScore.setText(String.valueOf(score));
-                score = 0;
+                etScore.setText(String.valueOf(game.getScore()));
+                game.setScore(0);
             }
 
             @Override
@@ -182,7 +252,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         gameOverDialog.setTitle("Game Over");
         gameOverDialog.setCancelable(false);
         etFinalScore = gameOverDialog.findViewById(R.id.etFinalScore);
-        etFinalScore.setText(Integer.toString(score));
+        etFinalScore.setText(Integer.toString(game.getScore()));
         btnGameOverExit = gameOverDialog.findViewById(R.id.btnGameOverExit); // use d.findViewById instead of findViewById
         btnGameOverExit.setOnClickListener(this::onClick);
 

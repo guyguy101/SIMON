@@ -10,13 +10,13 @@ import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class AboutActivity extends AppCompatActivity {
+public class AboutProgrammerActivity extends AppCompatActivity {
 
 Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_about);
+        setContentView(R.layout.activity_about_programmer);
 
         LinearLayout aboutLayout = findViewById(R.id.aboutLayout);
 

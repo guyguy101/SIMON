@@ -1,8 +1,21 @@
 <resources>
-    <string name="app_name">FIREBASE</string>
+    <string name="app_name">SIMON</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="firstName">First Name</string>
     <string name="lastName">Last Name</string>
     <string name="nickname">Nickname</string>
+
+    <string name="about_app_title">About the App - SIMON</string>
+    <string name="about_app_description">This app is a simple Simon game. Try to memorize and repeat the sequence of colors and sounds to progress to the next level.</string>
+    <string name="about_app_rules_title">Rules</string>
+    <string name="about_app_rules_description">
+        Welcome to Simon Game, a classic memory game!
+
+        The objective of the game is to repeat the sequence of colors and sounds that Simon generates. With each successful repetition, Simon adds another color to the sequence, making it more difficult.
+
+        There are two game modes: Easy and Hard. In Easy mode, the sequence is limited to a maximum of 4 colors. In Hard mode, there is no limit to the sequence of colors, but the player earns a score multiplier for each additional color in the sequence.
+
+        Good luck and have fun!
+    </string>
 </resources>

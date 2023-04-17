@@ -12,7 +12,7 @@
         android:layout_height="200dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
-        android:src="@drawable/red_button"/>
+        android:src="@drawable/profile_icon"/>
 
     <!-- Name text view below the image -->
     <TextView

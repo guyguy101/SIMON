@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA"   />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
 
     <application
         android:allowBackup="true"
@@ -16,18 +18,35 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FIREBASE"
         tools:targetApi="31">
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+
         <receiver
-            android:name=".TimeReceiver"
-            android:exported="true"
-            android:enabled="true">
+            android:name=".WifiReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+            </intent-filter>
         </receiver>
+
+        <service
+            android:name=".PlayTimeService"
+            android:enabled="true"
+            android:exported="false" />
+
+
         <activity
             android:name=".ScoreboardUserDetails"
             android:exported="false" />
         <activity
             android:name=".ScoreboardAdapter"
-            android:exported="false"
-             />
+            android:exported="false" />
+        <activity
+            android:name=".AboutAppActivity"
+            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -40,18 +59,17 @@
         </activity>
         <activity android:name=".OpenActivity" />
         <activity android:name=".PlayActivity" />
-        <activity android:name=".AboutActivity" />
+        <activity android:name=".AboutProgrammerActivity" />
         <activity android:name=".ScoreboardActivity" />
 
         <provider
-            android:authorities="com.example.firebase.fileProvider"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.firebase.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
-
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
     </application>
 

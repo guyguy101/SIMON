@@ -3,7 +3,6 @@ package com.example.firebase;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -13,13 +12,12 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Path;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.Menu;
@@ -36,16 +34,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
-import java.io.File;
-import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.zip.Inflater;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -59,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Dialog d;
 
     ProgressDialog progressDialog;
-
+    private WifiReceiver wifiReceiver = new WifiReceiver();
     Button btnAllPost;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference userRef;
@@ -74,7 +70,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Intent serviceIntent = new Intent(this, PlayTimeService.class);
+        startService(serviceIntent);
 
         LinearLayout linearLayout = findViewById(R.id.mainLayout);
 
@@ -95,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnMainRegister.setOnClickListener(this);
         progressDialog = new ProgressDialog(this);
 
-        scheduleBroadcast();
+
 
         UserDatabase dbHelper = new UserDatabase(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -125,8 +122,72 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //region Menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.exitItem:
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Closing Application")
+                        .setMessage("Are you sure you want to close `Simon?`")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                finishAndRemoveTask();
+                                finishAffinity();
+
+                            }
+
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+                return true;
+            case R.id.aboutProgramItem:
+                intent = new Intent(this, AboutProgrammerActivity.class);
+                startActivity(intent);
+                finish();
+            case R.id.aboutAppItem:
+                intent = new Intent(this,AboutAppActivity.class);
+                startActivity(intent);
+                finish();
+
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+    //endregion
+
+    //region BroadcastReceiver
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(wifiReceiver);
+    }
+    //endregion
+
     private void scheduleBroadcast() {
-        Intent intent = new Intent(this, TimeReceiver.class);
+        Intent intent = new Intent(this, WifiReceiver.class);
         intent.putExtra("requestCode", 123);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -181,7 +242,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Password Should be at least 6 characters long!", Toast.LENGTH_LONG).show();
                 return;
             }
-            register();
+
+
+            String nicknameToCheck = nickName;
+            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+            Query nicknameQuery = usersRef.orderByChild("nickname").equalTo(nicknameToCheck);
+
+            nicknameQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        Toast.makeText(MainActivity.this,"Nickname already exists!", Toast.LENGTH_LONG).show();
+                        return;
+                    } else {
+                        register();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Handle errors here
+                }
+            });
+
 
 
 
@@ -220,10 +303,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if(v==btnGuestLogin){
             String nickName = String.valueOf(etNickname.getText());
 
-            if( TextUtils.isEmpty(nickName)){
-                Toast.makeText(MainActivity.this, "One of the fields are missing", Toast.LENGTH_LONG).show();
-                return;
-            }
+
             getOpenActivity();
             d.dismiss();
         }
@@ -234,6 +314,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
     //endregion
+
     //region UTILS
     public boolean emailValidator(EditText etMail) {
 
@@ -269,45 +350,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         finish();
     }
     //endregion
-    //region closingApp
-    @Override
-    public void onBackPressed() {
-        new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Closing Application")
-                .setMessage("Are you sure you want to close `Simon?`")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
 
-                        finishAndRemoveTask();
-                        finishAffinity();
-
-                    }
-
-                })
-                .setNegativeButton("No", null)
-                .show();
-    }
-    //endregion
-    //region Menu
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.settings_menu, menu);
-        return true;
-        
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-       return super.onOptionsItemSelected(item);
-
-    }
-    //endregion
     //region FIREBASE - LOGIN/REGISTER/GUEST
 
     public void createRegisterDialog()
