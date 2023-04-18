@@ -115,16 +115,12 @@ public class ScoreboardActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.settings_menu, menu);
+        inflater.inflate(R.menu.menu_scoreboard, menu);
         return true;
 
 
     }
-    private String getCurrentDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        Date date = new Date();
-        return sdf.format(date);
-    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -167,12 +163,9 @@ public class ScoreboardActivity extends AppCompatActivity {
             case R.id.logoutItem:
                 logout();
                 return true;
-            case R.id.aboutProgramItem:
-                intent = new Intent(this, AboutProgrammerActivity.class);
-                startActivity(intent);
-                finish();
-            case R.id.aboutAppItem:
-                intent = new Intent(this,AboutAppActivity.class);
+
+            case R.id.backItem:
+                intent = new Intent(this,OpenActivity.class);
                 startActivity(intent);
                 finish();
 
@@ -181,6 +174,11 @@ public class ScoreboardActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+    private String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Date date = new Date();
+        return sdf.format(date);
     }
     //endregion
 

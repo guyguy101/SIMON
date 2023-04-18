@@ -20,8 +20,8 @@ public class EasySimonGame  {
     protected ImageButton[] buttons;
     protected ArrayList<Integer> sequence = new ArrayList<>();
     protected int sequenceIndex;
-    protected int score = 0;
-    protected int DELAY_MILLIS ;
+    protected int score;
+    protected int DELAY_MILLIS;
 
     public EasySimonGame(ImageButton[] buttons){
         DELAY_MILLIS = 1000;

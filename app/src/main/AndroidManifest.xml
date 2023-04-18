@@ -57,7 +57,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".OpenActivity" />
+        <activity android:name=".OpenActivity"
+            />
         <activity android:name=".PlayActivity" />
         <activity android:name=".AboutProgrammerActivity" />
         <activity android:name=".ScoreboardActivity" />

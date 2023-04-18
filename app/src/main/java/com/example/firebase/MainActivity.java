@@ -302,6 +302,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         else if(v==btnGuestLogin){
             String nickName = String.valueOf(etNickname.getText());
+            if(TextUtils.isEmpty(nickName)){
+                Toast.makeText(this,"Field is empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
 
             getOpenActivity();

@@ -16,7 +16,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toolbar;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -136,7 +138,9 @@ private UserDatabase dbHelper = new UserDatabase(this);
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
+
         inflater.inflate(R.menu.settings_menu, menu);
+
         return true;
 
 
@@ -160,22 +164,25 @@ private UserDatabase dbHelper = new UserDatabase(this);
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 // Get the current date
-                                Date currentDate = new Date();
+                                if(firebaseUser!= null){
+                                    Date currentDate = new Date();
 
-                                // Set the lastDatePlayed field in Firebase
-                                String userId = firebaseAuth.getCurrentUser().getUid();
-                                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
-                                userRef.child("lastDatePlayed").setValue(currentDate);
+                                    // Set the lastDatePlayed field in Firebase
+                                    String userId = firebaseAuth.getCurrentUser().getUid();
+                                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+                                    userRef.child("lastDatePlayed").setValue(currentDate);
 
-                                // Set the date in SQLite database
+                                    // Set the date in SQLite database
 
-                                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                                ContentValues values = new ContentValues();
-                                values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, getCurrentDate());
-                                String whereClause = UserDatabase.COLUMN_EMAIL + " = ?";
-                                String[] whereArgs = {firebaseAuth.getCurrentUser().getEmail()};
-                                db.update(UserDatabase.TABLE_NAME, values, whereClause, whereArgs);
-                                db.close();
+                                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                                    ContentValues values = new ContentValues();
+                                    values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, getCurrentDate());
+                                    String whereClause = UserDatabase.COLUMN_EMAIL + " = ?";
+                                    String[] whereArgs = {firebaseAuth.getCurrentUser().getEmail()};
+                                    db.update(UserDatabase.TABLE_NAME, values, whereClause, whereArgs);
+                                    db.close();
+                                }
+
 
                                 finishAndRemoveTask();
                                 finishAffinity();

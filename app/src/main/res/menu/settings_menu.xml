@@ -1,31 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-
-
  <item
-
      android:id="@+id/aboutProgramItem"
      android:title="About The Programmer"
-     android:icon="@drawable/ic_bluetooth_icon"
-
-     />
+     app:showAsAction="never"/>
 
  <item
      android:id="@+id/aboutAppItem"
      android:title="About The App"
-     android:icon="@drawable/ic_icon"/>
+     app:showAsAction="never"/>
 
  <item
      android:id="@+id/exitItem"
      android:title="Exit"
-     android:icon="@drawable/ic_icon"/>
+     app:showAsAction="never"/>
  <item
      android:icon="@drawable/ic_icon"
      android:id="@+id/logoutItem"
      android:title="Logout"
-
+     app:showAsAction="never"
      />
-
 </menu>
