@@ -67,7 +67,7 @@ public class EasySimonGame  {
         this.sequenceIndex = sequenceIndex;
     }
 
-    public void addToSequence(int num){
+    public void addToSequence(int num){ //add number to sequence
         sequence.add(num);
     }
 

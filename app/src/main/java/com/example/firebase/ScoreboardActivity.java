@@ -8,14 +8,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,6 +49,7 @@ public class ScoreboardActivity extends AppCompatActivity {
         finish();
     }
     public void sortUsers() { //bubble sort
+        //תוצאה לפי המשתמשים את הממיינת פעולה
         for (int i = 0; i < userList.size() - 1; i++) {
             for (int j = i + 1; j < userList.size(); j++) {
                 if (userList.get(j).getMaxScore() > userList.get(i).getMaxScore()) {
@@ -75,6 +80,16 @@ public class ScoreboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scoreboard);
+
+        ConstraintLayout constraintLayout = findViewById(R.id.constraintLayout);
+
+        AnimationDrawable animationDrawable = (AnimationDrawable) constraintLayout.getBackground();
+
+        animationDrawable.setEnterFadeDuration(2500);
+        animationDrawable.setExitFadeDuration(2500);
+        animationDrawable.setVisible(true, true);
+        animationDrawable.start();
+
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference usersRef = database.getReference("users");

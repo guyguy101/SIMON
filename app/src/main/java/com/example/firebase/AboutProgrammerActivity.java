@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class AboutProgrammerActivity extends AppCompatActivity {
 
 Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,13 +26,15 @@ Intent intent;
         animationDrawable.setEnterFadeDuration(2500);
         animationDrawable.setExitFadeDuration(2500);
         animationDrawable.start();
+
+
     }
-    //region Menu
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.playing_menu, menu);
+        inflater.inflate(R.menu.menu_back, menu);
         return true;
 
 
@@ -41,7 +44,7 @@ Intent intent;
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.backItem:
-                intent = new Intent(this, OpenActivity.class);
+                intent = new Intent(this , MainActivity.class);
                 startActivity(intent);
                 finish();
                 return true;

@@ -5,17 +5,15 @@
 
         android:id="@+id/aboutProgramItem"
         android:title="About The Programmer"
-        android:icon="@drawable/ic_bluetooth_icon"
-
         />
 
     <item
         android:id="@+id/aboutAppItem"
         android:title="About The App"
-        android:icon="@drawable/ic_icon"/>
+        />
 
     <item
         android:id="@+id/exitItem"
         android:title="Exit"
-        android:icon="@drawable/ic_icon"/>
+        />
 </menu>

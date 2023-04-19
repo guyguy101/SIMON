@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 public class AboutAppActivity extends AppCompatActivity {
@@ -31,7 +30,7 @@ Intent intent;
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.playing_menu, menu);
+        inflater.inflate(R.menu.menu_back, menu);
         return true;
 
 
@@ -41,7 +40,7 @@ Intent intent;
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.backItem:
-                intent = new Intent(this, OpenActivity.class);
+                intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
                 finish();
                 return true;

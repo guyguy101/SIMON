@@ -1,11 +1,11 @@
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp"
+    tools:context=".AboutAppActivity"
     android:background="@drawable/gradient_list"
-    android:id ="@+id/aboutAppLayout"
-    >
+    android:id="@+id/aboutAppLayout">
 
     <LinearLayout
         android:layout_width="match_parent"

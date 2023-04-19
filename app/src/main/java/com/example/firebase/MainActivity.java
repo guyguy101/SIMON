@@ -47,6 +47,8 @@ import java.text.SimpleDateFormat;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     Intent intent;
+    Intent intent1;
+    Intent intent2;
     Button btnAddPost;
     Button btnGuestLogin;
     Button btnReg,btnLogin,btnGuest;//dialog buttons
@@ -54,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     EditText etEmail,etPass,etNickname;
     Dialog d;
 
-    ProgressDialog progressDialog;
+
     private WifiReceiver wifiReceiver = new WifiReceiver();
     Button btnAllPost;
     FirebaseDatabase firebaseDatabase;
@@ -70,8 +72,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent serviceIntent = new Intent(this, PlayTimeService.class);
-        startService(serviceIntent);
+
+
 
         LinearLayout linearLayout = findViewById(R.id.mainLayout);
 
@@ -79,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         animationDrawable.setEnterFadeDuration(2500);
         animationDrawable.setExitFadeDuration(2500);
+        animationDrawable.setVisible(true, true);
         animationDrawable.start();
 
 
@@ -90,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btnMainRegister = (Button)findViewById(R.id.btnRegister);
         btnMainRegister.setOnClickListener(this);
-        progressDialog = new ProgressDialog(this);
+
 
 
 
@@ -104,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, "");
         long newRowId = db.insert(UserDatabase.TABLE_NAME, null, values);
         db.close();
+
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser= firebaseAuth.getCurrentUser();
@@ -130,7 +134,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         inflater.inflate(R.menu.main_menu, menu);
         return true;
 
-
     }
 
     @Override
@@ -155,20 +158,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setNegativeButton("No", null)
                         .show();
                 return true;
-            case R.id.aboutProgramItem:
-                intent = new Intent(this, AboutProgrammerActivity.class);
-                startActivity(intent);
-                finish();
             case R.id.aboutAppItem:
-                intent = new Intent(this,AboutAppActivity.class);
-                startActivity(intent);
+                intent2 = new Intent(this,AboutAppActivity.class);
+                startActivity(intent2);
                 finish();
-
+                break;
+            case R.id.aboutProgramItem:
+                intent1 = new Intent(this, AboutProgrammerActivity.class);
+                startActivity(intent1);
+                finish();
+                break;
 
             default:
                 return super.onOptionsItemSelected(item);
 
         }
+        return true;
     }
     //endregion
 
@@ -185,16 +190,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         unregisterReceiver(wifiReceiver);
     }
     //endregion
-
-    private void scheduleBroadcast() {
-        Intent intent = new Intent(this, WifiReceiver.class);
-        intent.putExtra("requestCode", 123);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        long delayMillis = 15 * 1000; // 15 seconds
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delayMillis, pendingIntent);
-    }
 
     //region onClick
     @Override
@@ -226,7 +221,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String nickName = String.valueOf(etNickname.getText());
             String pass = String.valueOf(etPass.getText());
             String email = String.valueOf(etEmail.getText());
-            if(TextUtils.isEmpty(email)  ){
+            if(TextUtils.isEmpty(pass) && TextUtils.isEmpty(email) && TextUtils.isEmpty(nickName)){
+                Toast.makeText(MainActivity.this, "ALL FIELDS ARE MISSING!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(TextUtils.isEmpty(pass) && TextUtils.isEmpty(email) ){
+                Toast.makeText(MainActivity.this, "Password and email field are missing!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(TextUtils.isEmpty(email) && TextUtils.isEmpty(nickName)){
+                Toast.makeText(MainActivity.this, "Email and nickname fields are missing!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(TextUtils.isEmpty(pass) && TextUtils.isEmpty(nickName)){
+                Toast.makeText(MainActivity.this, "Password and nickname fields are missing!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(TextUtils.isEmpty(nickName)){
+                Toast.makeText(MainActivity.this, "Nickname field is missing!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(TextUtils.isEmpty(email) ){
                 Toast.makeText(MainActivity.this, "Email field is missing!", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -234,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Password field is missing!", Toast.LENGTH_LONG).show();
                 return;
             }
+
             if(!emailValidator(etEmail)){
                 Toast.makeText(MainActivity.this, "Email isnt valid", Toast.LENGTH_LONG).show();
                 return;
@@ -244,26 +260,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
 
-            String nicknameToCheck = nickName;
-            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-            Query nicknameQuery = usersRef.orderByChild("nickname").equalTo(nicknameToCheck);
-
-            nicknameQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        Toast.makeText(MainActivity.this,"Nickname already exists!", Toast.LENGTH_LONG).show();
-                        return;
-                    } else {
-                        register();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // Handle errors here
-                }
-            });
+            register();
 
 
 
@@ -322,8 +319,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //region UTILS
     public boolean emailValidator(EditText etMail) {
 
-        String emailToText = etMail.getText().toString();
+        //שקר אחרת תקין הוא אם אמת ותחזיר אימייל המקבלת פעולה
 
+        String emailToText = etMail.getText().toString();
         if (!emailToText.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(emailToText).matches()) {
             return true;
         } else {
@@ -331,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
     public boolean passwordValidator(EditText etPassword) {
+        //שקר אחרת תקין הוא אם אמת ותחזיר סיסמא המקבלת פעולה
         String passwordToText = etPassword.getText().toString();
         if (passwordToText.length() >= 6) {
             return true;
@@ -341,6 +340,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onStart(){
+
+        // רשום כבר המשתמש אם הניווט למסך מעביר
         super.onStart();
         firebaseUser = firebaseAuth.getCurrentUser();
         if(firebaseUser != null)
@@ -349,6 +350,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
     public void getOpenActivity(){
+        //הניווט למסך המעבירה פעולה
         intent = new Intent(this,OpenActivity.class);
         startActivity(intent);
         finish();
@@ -359,6 +361,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void createRegisterDialog()
     {
+        //הירשמות דיאלוג היוצרת פעולה
         d= new Dialog(this);
         d.setContentView(R.layout.register_layout);
         d.setTitle("Register");
@@ -376,8 +379,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void register()
     {
 
-        progressDialog.setMessage("Registering Please Wait...");
-        progressDialog.show();
+        //הניווט למסך נעבור נוצר המשתמש כאשר , הנתונים למסדי שלו הנתונים את מוסיפה ,וסיסמא אימייל באמצעות משתמש היוצרת פעולה
 
         firebaseAuth.createUserWithEmailAndPassword(etEmail.getText().toString(),etPass.getText().toString()).addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -411,12 +413,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     });
                     btnMainLogin.setText("Logout");
+                    d.dismiss();
+                    getOpenActivity();
                 } else {
                     Toast.makeText(MainActivity.this, "Registration Error", Toast.LENGTH_LONG).show();
                 }
-                progressDialog.dismiss();
-                d.dismiss();
-                getOpenActivity();
+
+
             }
         });
 
@@ -424,6 +427,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void createLoginDialog()
     {
+        //משתמש התחברות דיאלוג היוצרת פעולה
         d= new Dialog(this);
         d.setContentView(R.layout.login_layout);
         d.setTitle("Login");
@@ -438,12 +442,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public  void login()
     {
-
-        progressDialog.setMessage("Login Please Wait...");
-        progressDialog.show();
-
-
-
+        //הניווט למסך נעבור מתחבר המשתמש כאשר  ,וסיסמא אימייל באמצעות משתמש המחברת פעולה
         firebaseAuth.signInWithEmailAndPassword(etEmail.getText().toString(),etPass.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -462,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         }
                         d.dismiss();
-                        progressDialog.dismiss();
+
                         getOpenActivity();
 
                     }
@@ -471,6 +470,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     public void createGuestDialog()
     {
+        //אורח התחברות דיאלוג היוצרת פעולה
         d= new Dialog(this);
         d.setContentView(R.layout.guest_layout);
         d.setTitle("GUEST");
@@ -489,17 +489,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
-
-    /*public void addUserDetails(){
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
-
-        User user = new User(etEmail.getText().toString(),etNickname.getText().toString(),uid);
-        userRef = firebaseDatabase.getReference("users").push();
-
-
-
-    }*/
-
 
 
 

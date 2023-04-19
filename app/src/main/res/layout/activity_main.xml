@@ -2,41 +2,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradient_list"
+    android:gravity="center"
     android:orientation="vertical"
-    android:paddingLeft="16dp"
     android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="16dp"
-    android:gravity="center"
-    tools:context=".MainActivity"
-    android:background="@drawable/gradient_list"
-    android:id ="@+id/mainLayout">
-    <TextView
-        android:layout_width="wrap_content"
+    tools:context=".MainActivity">
+
+
+
+    <ImageView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="WELCOME TO SIMON!"
-        android:textSize="35dp"
-        android:textColor="@color/black"
-        ></TextView>
+        android:src="@drawable/simon_logo"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="true"/>
+
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:text="Login"></Button>
+        android:text="Login"/>
 
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:text="Register"></Button>
+        android:text="Register"/>
+
     <Button
+        android:id="@+id/btnGuest"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:text="Guest Login"
-        android:id="@+id/btnGuest"></Button>
-
-
-
+        android:text="Guest Login"/>
 </LinearLayout>

@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/relativeLayout"
+    android:background="@drawable/gradient_list"
     tools:context=".ScoreboardUserDetails">
 
     <!-- Image view at the top center -->

@@ -8,18 +8,13 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
-@IgnoreExtraProperties
+
 public class User extends Guest{
-
-
-
         private String uid;//user uid
         private String email;
-
         private Integer maxScore;
         private final Date dateJoined;
         private Date lastDatePlayed;
-
 
         //region Constructors
         public User() {

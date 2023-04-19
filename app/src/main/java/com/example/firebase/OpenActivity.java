@@ -16,9 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toolbar;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,13 +37,18 @@ Dialog gameModeDialog;
 FirebaseAuth firebaseAuth;
 FirebaseUser firebaseUser;
 Intent intent;
-public static int GAME_MODE_CODE; //0 means easy mode, 1 means hard mode
+public static int GAME_MODE_CODE;//0 means easy mode, 1 means hard mode
 private WifiReceiver wifiReceiver = new WifiReceiver();
 private UserDatabase dbHelper = new UserDatabase(this);
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.opening_simon);
+
+
 
         LinearLayout linearLayout = findViewById(R.id.openingLayout);
         AnimationDrawable animationDrawable = (AnimationDrawable) linearLayout.getBackground();
@@ -87,7 +90,7 @@ private UserDatabase dbHelper = new UserDatabase(this);
             ChooseGameMode();
         }
         if(view == btnEasyMode){
-            GAME_MODE_CODE =0;
+            GAME_MODE_CODE = 0;
             gameModeDialog.dismiss();
             intent = new Intent(this,PlayActivity.class);
             startActivity(intent);
@@ -109,6 +112,8 @@ private UserDatabase dbHelper = new UserDatabase(this);
     }
 
     private void ChooseGameMode(){
+
+        //משחק קושי רמת לבחירת דיאלוג היוצרת פעולה
         gameModeDialog = new Dialog(this);
         gameModeDialog.setContentView(R.layout.gamemode_layout);
         gameModeDialog.setTitle("Game Over");
@@ -127,6 +132,8 @@ private UserDatabase dbHelper = new UserDatabase(this);
     }
 
     private void logout(){
+
+        //הפתיחה למסך אותו ומעבירה מהפיירבייס משתמש המנתקת פעולה
         firebaseAuth.signOut();
         intent= new Intent(this,MainActivity.class);
         startActivity(intent);
@@ -139,13 +146,14 @@ private UserDatabase dbHelper = new UserDatabase(this);
 
         MenuInflater inflater = getMenuInflater();
 
-        inflater.inflate(R.menu.settings_menu, menu);
+        inflater.inflate(R.menu.menu_open, menu);
 
         return true;
 
 
     }
     private String getCurrentDate() {
+        //נוכחי תאריך קבלת
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Date date = new Date();
         return sdf.format(date);
@@ -163,8 +171,9 @@ private UserDatabase dbHelper = new UserDatabase(this);
                         {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // Get the current date
+
                                 if(firebaseUser!= null){
+                                    //הנתונים במסדי השדות ועדכון מהמשחק יציאה
                                     Date currentDate = new Date();
 
                                     // Set the lastDatePlayed field in Firebase
@@ -195,14 +204,7 @@ private UserDatabase dbHelper = new UserDatabase(this);
             case R.id.logoutItem:
                 logout();
                 return true;
-            case R.id.aboutProgramItem:
-                intent = new Intent(this, AboutProgrammerActivity.class);
-                startActivity(intent);
-                finish();
-            case R.id.aboutAppItem:
-                intent = new Intent(this,AboutAppActivity.class);
-                startActivity(intent);
-                finish();
+
 
 
             default:

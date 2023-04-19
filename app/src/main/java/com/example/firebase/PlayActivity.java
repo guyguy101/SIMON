@@ -4,21 +4,15 @@ import static android.content.ContentValues.TAG;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Path;
-import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.service.autofill.FillEventHistory;
 import android.util.Log;
-import android.util.Size;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,7 +20,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -51,7 +44,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     protected Handler handler = new Handler();
     protected Random random = new Random();
     EasySimonGame game;
-
     protected WifiReceiver wifiReceiver = new WifiReceiver();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +74,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public EasySimonGame SetGameMode(){
+        //הקושי רמת לפי משחק אובייקט המחזירה פעולה
         if(OpenActivity.GAME_MODE_CODE == 1)
             return game = new HardSimonGame(buttons);
         return game;
@@ -100,7 +93,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view.getId() == R.id.btnStart) {
             startGame();
         } else if(view.getId() == R.id.btnRed){
-
+            //הקושי רמת לפי דיליי כמות עם הכפתור את להאיר
             handleButtonClick((ImageButton) view);
             glowButton((ImageButton) view);
             handler.postDelayed(() -> unglowButton((ImageButton) view), game.DELAY_MILLIS);
@@ -140,12 +133,16 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     //endregion
 
     protected void startGame() {
+        //פעולה המתחילה את המשחק
         game.setSequence(new ArrayList<Integer>());
         addToSequence();
         playSequence();
     }
 
     protected void addToSequence() {
+        //פעולה המוסיפה מספר לרצף בין אפס לארבע שמייצגים את האינדקס של כל כפתור
+        //משתנה הרביעי הכפתור רק אז ארבע לגודל מגיע הרצף כאשר אז קל במצב המשחק אם
+        //לגדול ממשיך הרצף אחרת
         if(OpenActivity.GAME_MODE_CODE == 1){
             game.addToSequence(random.nextInt(buttons.length));
         }
@@ -163,6 +160,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     protected void playSequence() {
+        //עליהם יחזור שהמשתמש כדי ברצף שנמצאים הכפתורים את להאיר
         for (int i = 0; i < game.sequence.size(); i++) {
             int buttonIndex = game.getSequence().get(i);
 
@@ -176,12 +174,17 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
      protected void handleButtonClick(ImageButton button) {
+
+         //כפתור על לחיצה עם המתמודדת פעולה
+         //קל ממשחק יותר בשתיים תעלה התוצאה אז קשה מסוג המשחק אם
+         //המשתמש נתוני את יעדכן רשום המשתמש אם
+         //נפסלת אם משחק סיום דיאלוג יוצרת
         if (game.getSequence().size() > 0 && button.getId() == buttons[game.getSequence().get(game.getSequenceIndex())].getId()) {
             game.setSequenceIndex(++game.sequenceIndex);
             if (game.getSequenceIndex() >= game.getSequence().size()) {
                 addToSequence();
                 playSequence();
-                if(OpenActivity.GAME_MODE_CODE == 1){
+                if(game instanceof HardSimonGame){
                     int updatedScore = game.getScore() + 1 + ((HardSimonGame) game).getScoreMultiplier();
                     game.setScore(updatedScore);
                     etScore.setText(String.valueOf(game.getScore()));
@@ -215,6 +218,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     protected void updateUserScore() {
+        //הנתונים במסדי המשתמש תוצאת נתוני עדכון
         String userId = firebaseAuth.getCurrentUser().getUid();
         DatabaseReference maxScoreRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("maxScore");
 
@@ -265,7 +269,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.playing_menu, menu);
+        inflater.inflate(R.menu.menu_back, menu);
         return true;
 
 
