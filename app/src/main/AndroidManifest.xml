@@ -18,9 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FIREBASE"
         tools:targetApi="31">
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
+
 
         <receiver
             android:name=".WifiReceiver"
