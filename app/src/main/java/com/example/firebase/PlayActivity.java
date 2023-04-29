@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -48,6 +49,17 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     EasySimonGame game;
     protected WifiReceiver wifiReceiver = new WifiReceiver();
     private int buttonsPressed =0;
+
+    private Handler gameHandler = new Handler();
+    private Runnable gameOverRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateUserScore();
+            Toast.makeText(PlayActivity.this,"Timed out for not playing", Toast.LENGTH_LONG);
+            createGameOverDialog();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +99,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+        gameHandler.removeCallbacks(gameOverRunnable); // remove any previously scheduled game over runnable
+        gameHandler.postDelayed(gameOverRunnable, 10000); // schedule the game over runnable to run in 10 seconds
         if (view.getId() == R.id.btnGameOverExit) {
             gameOverDialog.dismiss();
             intent = new Intent(this, OpenActivity.class);
@@ -104,10 +118,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 if (!buttonPressed) {
+                    Toast.makeText(PlayActivity.this,"Timed out for not playing", Toast.LENGTH_LONG);
                     createGameOverDialog();
-                    Toast.makeText(this,"Timed out for not playing", Toast.LENGTH_LONG);
+
                 }
             }, 10000);
+
         } else if(view.getId() == R.id.btnRed){
             //הקושי רמת לפי דיליי כמות עם הכפתור את להאיר
             handleButtonClick((ImageButton) view);
@@ -279,16 +295,22 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
     protected void createGameOverDialog(){
 
-        gameOverDialog = new Dialog(PlayActivity.this);
-        gameOverDialog.setContentView(R.layout.gameover_layout);
-        gameOverDialog.setTitle("Game Over");
-        gameOverDialog.setCancelable(false);
-        etFinalScore = gameOverDialog.findViewById(R.id.etFinalScore);
-        etFinalScore.setText(Integer.toString(game.getScore()));
-        btnGameOverExit = gameOverDialog.findViewById(R.id.btnGameOverExit); // use d.findViewById instead of findViewById
-        btnGameOverExit.setOnClickListener(this::onClick);
+        try {
+            // code to display dialog or toast message
+            gameOverDialog = new Dialog(PlayActivity.this);
+            gameOverDialog.setContentView(R.layout.gameover_layout);
+            gameOverDialog.setTitle("Game Over");
+            gameOverDialog.setCancelable(false);
+            etFinalScore = gameOverDialog.findViewById(R.id.etFinalScore);
+            etFinalScore.setText(Integer.toString(game.getScore()));
+            btnGameOverExit = gameOverDialog.findViewById(R.id.btnGameOverExit); // use d.findViewById instead of findViewById
+            btnGameOverExit.setOnClickListener(this::onClick);
 
-        gameOverDialog.show();
+            gameOverDialog.show();
+        } catch (WindowManager.BadTokenException e) {
+
+        }
+
 
     }
 //endregion
