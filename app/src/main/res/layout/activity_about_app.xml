@@ -32,7 +32,7 @@
             android:layout_marginTop="16dp"
             android:textColor="@color/black"
             android:text="@string/about_app_description"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
 
         <View
             android:layout_width="match_parent"
@@ -45,7 +45,7 @@
             android:layout_marginTop="16dp"
             android:textColor="@color/black"
             android:text="@string/about_app_rules_title"
-            android:textSize="20sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <View
@@ -56,10 +56,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20sp"
             android:textColor="@color/black"
             android:text="@string/about_app_rules_description"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
 </ScrollView>

@@ -15,6 +15,7 @@ public class UserDatabase extends SQLiteOpenHelper {
     public static final String COLUMN_EMAIL = "email";
     public static final String COLUMN_NICKNAME = "nickname";
     public static final String COLUMN_MAX_SCORE = "max_score";
+    public static final String AMOUNT_BUTTONS_PRESSED = "buttons_pressed";
     public static final String COLUMN_DATE_JOINED = "last_date_joined";
     public static final String COLUMN_LAST_DATE_PLAYED = "last_date_played";
 
@@ -24,6 +25,7 @@ public class UserDatabase extends SQLiteOpenHelper {
                     COLUMN_EMAIL + " TEXT NOT NULL, " +
                     COLUMN_NICKNAME + " TEXT NOT NULL, " +
                     COLUMN_MAX_SCORE + " INTEGER DEFAULT 0, " +
+                    AMOUNT_BUTTONS_PRESSED + " INTEGER DEFAULT 0, " +
                     COLUMN_DATE_JOINED + " TEXT, " +
                     COLUMN_LAST_DATE_PLAYED + " TEXT);";
 
@@ -38,6 +40,7 @@ public class UserDatabase extends SQLiteOpenHelper {
                 COLUMN_EMAIL + " TEXT," +
                 COLUMN_NICKNAME + " TEXT," +
                 COLUMN_MAX_SCORE + " INTEGER DEFAULT 0," +
+                AMOUNT_BUTTONS_PRESSED + " INTEGER DEFAULT 0, " +
                 COLUMN_DATE_JOINED + " TEXT," +
                 COLUMN_LAST_DATE_PLAYED + " TEXT" +
                 ")");

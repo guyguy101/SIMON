@@ -14,7 +14,7 @@
         android:gravity="center"
         android:text="CHOOSE YOUR GAME MODE!"
         android:textColor="@color/black"
-        android:textSize="27sp"></TextView>
+        android:textSize="24sp"></TextView>
 
 
     <LinearLayout

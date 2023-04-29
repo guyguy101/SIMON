@@ -10,6 +10,7 @@ import java.util.Objects;
 
 
 public class User extends Guest{
+
         private String uid;//user uid
         private String email;
         private Integer maxScore;
@@ -37,16 +38,12 @@ public class User extends Guest{
         }
         //endregion
         //region Getters
-        public String getUid(){
+         public String getUid(){
             return this.uid;
          }
 
          public String getEmail(){
             return this.email;
-         }
-
-         public String getNickname(){
-            return this.nickname;
          }
 
          public Integer getMaxScore(){
@@ -67,13 +64,11 @@ public class User extends Guest{
             this.email = email;
         }
 
-        public void setNickname(String nickname) {
-            this.nickname = nickname;
-        }
+        public void setLastDatePlayed(Date lastDatePlayed) {this.lastDatePlayed = lastDatePlayed;}
 
-        public void setMaxScore(Integer maxScore) {
-            this.maxScore = maxScore;
-        }
+        public void setMaxScore(Integer maxScore) {this.maxScore = maxScore;}
+
+        //NOTE 4 SETTERS BECAUSE DATEJOINED FIELD IS FINAL
     //endregion
         //region Overrides
     @Override

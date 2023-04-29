@@ -1,14 +1,8 @@
 package com.example.firebase;
 
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.Menu;
@@ -29,19 +22,22 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
+
+
 
 import java.text.SimpleDateFormat;
+
+
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -103,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         values.put(UserDatabase.COLUMN_EMAIL, "");
         values.put(UserDatabase.COLUMN_NICKNAME, "");
         values.put(UserDatabase.COLUMN_MAX_SCORE, 0);
+        values.put(UserDatabase.AMOUNT_BUTTONS_PRESSED, 0);
         values.put(UserDatabase.COLUMN_DATE_JOINED, "");
         values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, "");
         long newRowId = db.insert(UserDatabase.TABLE_NAME, null, values);
@@ -131,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return true;
 
     }
@@ -148,9 +145,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
                                 finishAndRemoveTask();
                                 finishAffinity();
+                                System.exit(0);
 
                             }
 
@@ -220,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             String nickName = String.valueOf(etNickname.getText());
             String pass = String.valueOf(etPass.getText());
-            String email = String.valueOf(etEmail.getText());
+            String email = etEmail.getText().toString().trim();
             if(TextUtils.isEmpty(pass) && TextUtils.isEmpty(email) && TextUtils.isEmpty(nickName)){
                 Toast.makeText(MainActivity.this, "ALL FIELDS ARE MISSING!", Toast.LENGTH_LONG).show();
                 return;
@@ -250,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return;
             }
 
-            if(!emailValidator(etEmail)){
+            if(emailValidator(etEmail) == false){
                 Toast.makeText(MainActivity.this, "Email isnt valid", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -328,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return false;
         }
     }
+
     public boolean passwordValidator(EditText etPassword) {
         //שקר אחרת תקין הוא אם אמת ותחזיר סיסמא המקבלת פעולה
         String passwordToText = etPassword.getText().toString();
@@ -341,7 +339,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStart(){
 
-        // רשום כבר המשתמש אם הניווט למסך מעביר
         super.onStart();
         firebaseUser = firebaseAuth.getCurrentUser();
         if(firebaseUser != null)
@@ -402,6 +399,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 values.put(UserDatabase.COLUMN_EMAIL, user.getEmail());
                                 values.put(UserDatabase.COLUMN_NICKNAME, user.getNickname());
                                 values.put(UserDatabase.COLUMN_MAX_SCORE, user.getMaxScore());
+                                values.put(UserDatabase.AMOUNT_BUTTONS_PRESSED, 0);
                                 values.put(UserDatabase.COLUMN_DATE_JOINED, new SimpleDateFormat("dd/MM/yyyy").format(user.getDateJoined()));
                                 values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, new SimpleDateFormat("dd/MM/yyyy").format(user.getLastDatePlayed()));
                                 long newRowId = db.insert(UserDatabase.TABLE_NAME, null, values);
@@ -453,16 +451,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Toast.makeText(MainActivity.this, "Authentication Succeeded",Toast.LENGTH_SHORT).show();
 
                             btnMainLogin.setText("Logout");
-
+                            d.dismiss();
+                            getOpenActivity();
                         }
                         else
                         {
                             Toast.makeText(MainActivity.this, "Authentication Failed",Toast.LENGTH_SHORT).show();
 
                         }
-                        d.dismiss();
 
-                        getOpenActivity();
 
                     }
                 });

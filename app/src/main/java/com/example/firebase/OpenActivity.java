@@ -195,6 +195,7 @@ private UserDatabase dbHelper = new UserDatabase(this);
 
                                 finishAndRemoveTask();
                                 finishAffinity();
+                                System.exit(0);
                             }
 
                         })

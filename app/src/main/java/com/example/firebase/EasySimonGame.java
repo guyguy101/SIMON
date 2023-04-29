@@ -55,6 +55,8 @@ public class EasySimonGame  {
         return score;
     }
 
+    public int getDelayMillist() {return DELAY_MILLIS;}
+
     public void setScore(int score) {
         this.score = score;
     }
@@ -66,6 +68,10 @@ public class EasySimonGame  {
     public void setSequenceIndex(int sequenceIndex) {
         this.sequenceIndex = sequenceIndex;
     }
+
+    public void setButtons(ImageButton[] buttons) {this.buttons = buttons;}
+
+    public void setDELAY_MILLIS(int DELAY_MILLIS) {this.DELAY_MILLIS = DELAY_MILLIS;}
 
     public void addToSequence(int num){ //add number to sequence
         sequence.add(num);

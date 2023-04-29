@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class HardSimonGame extends EasySimonGame{
+
     private int scoreMultiplier = 2;
+
     public HardSimonGame(ImageButton[] buttons){
         super(buttons);
-        DELAY_MILLIS = 500;
+        DELAY_MILLIS = 250;
         score = 0;
         this.buttons = buttons;
 

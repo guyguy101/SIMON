@@ -13,7 +13,9 @@ public class Guest {
         this.nickname = name;
     }
 
+    public String getNickname(){return this.nickname;}
 
+    public void setNickname(String nickname) {this.nickname = nickname;}
 
     @Override
     public String toString() {

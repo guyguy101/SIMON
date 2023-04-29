@@ -1,6 +1,6 @@
 package com.example.firebase;
 
-import static android.content.ContentValues.TAG;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,6 +20,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,7 +38,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
     protected ImageButton[] buttons = new ImageButton[4];
     protected Button btnStart, btnGameOverExit;
-    protected EditText etScore, etFinalScore;
+    protected TextView etScore, etFinalScore;
     protected Dialog gameOverDialog;
     protected Intent intent;
     protected FirebaseUser firebaseUser;
@@ -45,6 +47,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     protected Random random = new Random();
     EasySimonGame game;
     protected WifiReceiver wifiReceiver = new WifiReceiver();
+    private int buttonsPressed =0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +95,19 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
         } else if (view.getId() == R.id.btnStart) {
             startGame();
+            handler.postDelayed(() -> {
+                boolean buttonPressed = false;
+                for (ImageButton button : buttons) {
+                    if (button.isPressed()) {
+                        buttonPressed = true;
+                        break;
+                    }
+                }
+                if (!buttonPressed) {
+                    createGameOverDialog();
+                    Toast.makeText(this,"Timed out for not playing", Toast.LENGTH_LONG);
+                }
+            }, 10000);
         } else if(view.getId() == R.id.btnRed){
             //הקושי רמת לפי דיליי כמות עם הכפתור את להאיר
             handleButtonClick((ImageButton) view);
@@ -116,6 +132,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             glowButton((ImageButton) view);
             handler.postDelayed(() -> unglowButton((ImageButton) view), game.DELAY_MILLIS);
         }
+
     }
 
     //region BroadcastReceiver
@@ -174,11 +191,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
      protected void handleButtonClick(ImageButton button) {
-
          //כפתור על לחיצה עם המתמודדת פעולה
          //קל ממשחק יותר בשתיים תעלה התוצאה אז קשה מסוג המשחק אם
          //המשתמש נתוני את יעדכן רשום המשתמש אם
          //נפסלת אם משחק סיום דיאלוג יוצרת
+         ++buttonsPressed;
         if (game.getSequence().size() > 0 && button.getId() == buttons[game.getSequence().get(game.getSequenceIndex())].getId()) {
             game.setSequenceIndex(++game.sequenceIndex);
             if (game.getSequenceIndex() >= game.getSequence().size()) {
@@ -222,6 +239,17 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         String userId = firebaseAuth.getCurrentUser().getUid();
         DatabaseReference maxScoreRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("maxScore");
 
+        UserDatabase dbHelper = new UserDatabase(PlayActivity.this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(UserDatabase.AMOUNT_BUTTONS_PRESSED, buttonsPressed);
+        String whereClause = UserDatabase.COLUMN_ID + "=?";
+        String[] whereArgs = {userId};
+        db.update(UserDatabase.TABLE_NAME, values, whereClause, whereArgs);
+        db.close();
+
+        buttonsPressed = 0;
+
         maxScoreRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -245,13 +273,13 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "Error reading max score from database: " + databaseError.getMessage());
+
             }
         });
     }
     protected void createGameOverDialog(){
 
-        gameOverDialog = new Dialog(this);
+        gameOverDialog = new Dialog(PlayActivity.this);
         gameOverDialog.setContentView(R.layout.gameover_layout);
         gameOverDialog.setTitle("Game Over");
         gameOverDialog.setCancelable(false);
