@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,6 +44,8 @@ public class ScoreboardActivity extends AppCompatActivity {
     private Intent intent;
     private UserDatabase dbHelper = new UserDatabase(this);
     FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
+    Button returnButton;
 
     @Override
     public void onBackPressed() {
@@ -98,6 +103,16 @@ public class ScoreboardActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
+        returnButton = findViewById(R.id.btnReturn);
+        returnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ScoreboardActivity.this,OpenActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
 
 
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -122,7 +137,8 @@ public class ScoreboardActivity extends AppCompatActivity {
             }
         });
 
-
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser= firebaseAuth.getCurrentUser();
 
     }
     //region Menu
@@ -151,21 +167,23 @@ public class ScoreboardActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 // Get the current date
                                 Date currentDate = new Date();
+                                if(firebaseUser != null){
+                                    // Set the lastDatePlayed field in Firebase
+                                    String userId = firebaseAuth.getCurrentUser().getUid();
+                                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+                                    userRef.child("lastDatePlayed").setValue(currentDate);
 
-                                // Set the lastDatePlayed field in Firebase
-                                String userId = firebaseAuth.getCurrentUser().getUid();
-                                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
-                                userRef.child("lastDatePlayed").setValue(currentDate);
+                                    // Set the date in SQLite database
 
-                                // Set the date in SQLite database
+                                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                                    ContentValues values = new ContentValues();
+                                    values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, getCurrentDate());
+                                    String whereClause = UserDatabase.COLUMN_EMAIL + " = ?";
+                                    String[] whereArgs = {firebaseAuth.getCurrentUser().getEmail()};
+                                    db.update(UserDatabase.TABLE_NAME, values, whereClause, whereArgs);
+                                    db.close();
+                                }
 
-                                SQLiteDatabase db = dbHelper.getWritableDatabase();
-                                ContentValues values = new ContentValues();
-                                values.put(UserDatabase.COLUMN_LAST_DATE_PLAYED, getCurrentDate());
-                                String whereClause = UserDatabase.COLUMN_EMAIL + " = ?";
-                                String[] whereArgs = {firebaseAuth.getCurrentUser().getEmail()};
-                                db.update(UserDatabase.TABLE_NAME, values, whereClause, whereArgs);
-                                db.close();
 
                                 finishAndRemoveTask();
                                 finishAffinity();

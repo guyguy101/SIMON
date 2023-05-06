@@ -1,39 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/aboutLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:gravity="center"
-    tools:context=".AboutProgrammerActivity"
     android:background="@drawable/gradient_list"
-    android:id ="@+id/aboutLayout">
+    android:gravity="top|center"
+    android:orientation="vertical"
+
+    tools:context=".AboutProgrammerActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="33dp"
-        android:textColor="@color/black"
-        android:text="About The Programmer"></TextView>
+        android:gravity="center_horizontal"
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="33dp"
+        android:text="About The Programmer"
         android:textColor="@color/black"
-        android:text="ID: 329194005"></TextView>
+        android:textSize="33dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="33dp"
-        android:textColor="@color/black"
-        android:text="Name: Guy Manevych"></TextView>
+    <LinearLayout
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="29dp"
-        android:textColor="@color/black"
-        android:text="Teacher Name: Avital Shain"></TextView>
+        android:layout_width="match_parent"
+        android:layout_height="208dp"
+        android:gravity="center"
+        android:layout_marginTop="200dp"
+        android:orientation="vertical"
+        tools:context=".AboutProgrammerActivity">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID: 329194005"
+            android:textColor="@color/black"
+            android:textSize="33dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name: Guy Manevych"
+            android:textColor="@color/black"
+            android:textSize="33dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Teacher Name: Avital Shain"
+            android:textColor="@color/black"
+            android:textSize="29dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Year: 2023"
+            android:textColor="@color/black"
+            android:textSize="29dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="School Name: Amit Amal Highschool"
+            android:textColor="@color/black"
+            android:textSize="22dp" />
+    </LinearLayout>
+
 </LinearLayout>
+
+
