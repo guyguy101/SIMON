@@ -54,7 +54,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     private Runnable gameOverRunnable = new Runnable() {
         @Override
         public void run() {
-            updateUserScore();
+            if(firebaseUser != null)
+                updateUserScore();
             Toast.makeText(PlayActivity.this,"Timed out for not playing", Toast.LENGTH_LONG);
             createGameOverDialog();
         }

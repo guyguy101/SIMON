@@ -113,6 +113,8 @@ public class ScoreboardActivity extends AppCompatActivity {
             }
         });
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser= firebaseAuth.getCurrentUser();
 
 
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -137,8 +139,7 @@ public class ScoreboardActivity extends AppCompatActivity {
             }
         });
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseUser= firebaseAuth.getCurrentUser();
+
 
     }
     //region Menu
