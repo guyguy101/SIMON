@@ -319,11 +319,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //שקר אחרת תקין הוא אם אמת ותחזיר אימייל המקבלת פעולה
 
         String emailToText = etMail.getText().toString();
-        if (!emailToText.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(emailToText).matches()) {
+        if (!emailToText.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(emailToText).matches() && emailToText.endsWith("@gmail.com")) {
             return true;
         } else {
             return false;
         }
+
     }
 
     public boolean passwordValidator(EditText etPassword) {
